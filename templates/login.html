@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SignBridge — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --cream:#faf7f2;--sand:#f0e8d8;--tan:#e4d5bc;--bark:#c4a882;--brown:#8b6a42;--espresso:#3d2b1a;--accent:#c44b1e;--text:#2a1f14;--muted:#7a6652;
+}
+body{
+  margin:0;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--cream);
+  color:var(--text);
+}
+nav{height:68px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--tan);flex-shrink:0}
+.page-wrapper{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:calc(100vh - 68px); /* subtract nav height */
+}
+.container{background:#fff;border-radius:16px;padding:48px 36px;max-width:420px;width:100%;box-shadow:0 16px 40px rgba(61,43,26,.1)}
+h1{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;margin-bottom:24px;color:var(--espresso)}
+form{display:flex;flex-direction:column;gap:18px}
+input{padding:12px 16px;font-size:1rem;border-radius:10px;border:1px solid var(--tan);outline:none;transition:all .2s}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(196,75,30,.15)}
+button{padding:14px 0;background:var(--espresso);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:1rem;cursor:pointer;transition:all .2s}
+button:hover{background:var(--accent);transform:translateY(-2px);box-shadow:0 12px 32px rgba(196,75,30,.3)}
+p{text-align:center;font-size:.9rem;color:var(--muted)}
+a{color:var(--accent);text-decoration:none;font-weight:600}
+.flash-msg{background:var(--sand);color:var(--brown);padding:10px 14px;border-radius:8px;font-size:.85rem;margin-bottom:16px}
+</style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">Sign<em>Bridge</em></a>
+    <a href="/" class="back">← Home</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container">
+      <h1>Login</h1>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for msg in messages %}
+            <div class="flash-msg">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      <form method="POST">
+        <input type="text" name="mail" placeholder="Mail Id" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+      </form>
+      <p>Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+    </div>
+  </div>
+</body>
+</html>

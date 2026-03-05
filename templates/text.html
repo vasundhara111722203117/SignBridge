@@ -1,0 +1,8 @@
+<h2>Recognized Text</h2>
+<p>{{text}}</p>
+
+<form action="/sign" method="post">
+    <input type="hidden" name="text" value="{{text}}">
+    <input type="hidden" name="video" value="{{audio.replace('.wav','.mp4')}}">
+    <button type="submit">Generate Sign Video</button>
+</form>

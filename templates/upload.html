@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload — SignBridge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--cream:#faf7f2;--warm:#fff9f2;--sand:#f0e8d8;--tan:#e4d5bc;--bark:#c4a882;--brown:#8b6a42;--espresso:#3d2b1a;--accent:#c44b1e;--teal:#1a7a6e;--text:#2a1f14;--muted:#7a6652}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--cream);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;display:flex;flex-direction:column;min-height:100vh}
+nav{height:68px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--tan);flex-shrink:0}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;color:var(--espresso);text-decoration:none}
+.logo em{color:var(--accent);font-style:normal}
+.back{color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+.back:hover{color:var(--espresso)}
+.main-wrap{flex:1;display:grid;grid-template-columns:1fr 420px;overflow:hidden}
+.left-panel{position:relative;overflow:hidden}
+.left-bg{position:absolute;inset:0;background-image:url('https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&cs=tinysrgb&w=1200');background-size:cover;background-position:center}
+.left-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(61,43,26,.75) 0%,rgba(196,75,30,.4) 100%)}
+.left-content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:48px}
+.left-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:100px;padding:6px 16px;font-size:.78rem;font-weight:600;margin-bottom:20px}
+.left-title{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;color:#fff;line-height:1.1;margin-bottom:16px}
+.left-desc{color:rgba(255,255,255,.75);font-size:.92rem;line-height:1.65;max-width:380px}
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:32px}
+.step-item{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.85)}
+.step-num{width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;border:1px solid rgba(255,255,255,.3)}
+.step-text{font-size:.85rem}
+.right-panel{background:#fff;overflow-y:auto;padding:48px 40px;display:flex;flex-direction:column;justify-content:center;border-left:1px solid var(--tan)}
+.form-header{margin-bottom:36px;animation:fadeUp .6s ease both}
+.step-tag{display:inline-flex;align-items:center;gap:6px;background:var(--sand);border:1px solid var(--tan);border-radius:100px;padding:5px 14px;font-size:.75rem;color:var(--brown);font-weight:600;margin-bottom:16px}
+.form-title{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:800;color:var(--espresso);letter-spacing:-.5px;margin-bottom:8px}
+.form-sub{color:var(--muted);font-size:.88rem;line-height:1.6}
+.upload-zone{border:2px dashed var(--tan);border-radius:16px;padding:44px 24px;text-align:center;cursor:pointer;transition:all .25s;background:var(--cream);margin-bottom:24px;animation:fadeUp .6s .1s ease both}
+.upload-zone:hover,.upload-zone.over{border-color:var(--accent);background:rgba(196,75,30,.03)}
+.upload-zone.has-file{border-color:var(--teal);border-style:solid;background:rgba(26,122,110,.03)}
+.u-icon{font-size:2.2rem;margin-bottom:14px;display:block}
+.u-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:800;color:var(--espresso);margin-bottom:6px}
+.u-sub{color:var(--muted);font-size:.82rem;margin-bottom:18px}
+.browse-label{display:inline-block;background:var(--espresso);color:#fff;border-radius:8px;padding:9px 20px;font-size:.82rem;font-weight:600;cursor:pointer;transition:background .2s}
+.browse-label:hover{background:var(--accent)}
+input[type=file]{display:none}
+.file-row{display:none;align-items:center;gap:12px;background:var(--sand);border-radius:12px;padding:12px 16px;margin-top:16px}
+.file-row.show{display:flex}
+.fi{width:40px;height:40px;background:var(--tan);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.fn{flex:1;font-size:.85rem;font-weight:600;color:var(--espresso);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs{font-size:.75rem;color:var(--muted)}
+.rm{background:rgba(196,75,30,.1);border:none;color:var(--accent);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.78rem;transition:background .2s}
+.rm:hover{background:rgba(196,75,30,.2)}
+.prog{height:3px;background:var(--sand);border-radius:100px;margin-bottom:20px;overflow:hidden;display:none}
+.prog.show{display:block}
+.prog-fill{height:100%;background:var(--accent);border-radius:100px;width:0;transition:width 2s ease}
+.submit-btn{width:100%;background:var(--espresso);color:#fff;border:none;border-radius:12px;padding:17px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;animation:fadeUp .6s .2s ease both}
+.submit-btn:hover{background:var(--accent);transform:translateY(-1px);box-shadow:0 8px 24px rgba(196,75,30,.25)}
+.submit-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:none}
+.loading .spinner{display:block}
+.loading .btn-text{display:none}
+.note{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px;animation:fadeUp .6s .3s ease both}
+.note-item{background:var(--sand);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--tan)}
+.note-item .ni{font-size:1.1rem;margin-bottom:6px}
+.note-item p{font-size:.73rem;color:var(--muted);line-height:1.4}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">Sign<em>Bridge</em></a>
+  <a href="/index" class="back">← Home</a>
+</nav>
+<div class="main-wrap">
+  <div class="left-panel">
+    <div class="left-bg"></div>
+    <div class="left-content">
+      <div class="left-tag">🤟 Sign Language Mode</div>
+      <div class="left-title">Upload Your<br>Video to Begin</div>
+      <p class="left-desc">We'll extract audio, run AI speech recognition, and generate synchronized sign language clips.</p>
+      <div class="steps">
+        <div class="step-item"><div class="step-num">1</div><span class="step-text">Upload your video file</span></div>
+        <div class="step-item"><div class="step-num">2</div><span class="step-text">AI extracts and transcribes audio</span></div>
+        <div class="step-item"><div class="step-num">3</div><span class="step-text">Preview the sign language output</span></div>
+        <div class="step-item"><div class="step-num">4</div><span class="step-text">Download merged H.264 MP4</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="form-header">
+      <div class="step-tag">Step 1 of 4</div>
+      <div class="form-title">Upload Video</div>
+      <p class="form-sub">Drag and drop your video or click to browse. MP4, MOV, AVI up to 500MB.</p>
+    </div>
+    <form action="/upload" method="post" enctype="multipart/form-data" id="upForm">
+      <div class="upload-zone" id="dz">
+        <span class="u-icon">📹</span>
+        <div class="u-title">Drop video here</div>
+        <p class="u-sub">MP4 · MOV · AVI · MKV</p>
+        <label class="browse-label" for="vi">Browse files</label>
+        <input type="file" name="video" id="vi" accept="video/*" required>
+        <div class="file-row" id="fr">
+          <div class="fi">🎬</div>
+          <div style="flex:1;min-width:0">
+            <div class="fn" id="fn">-</div>
+            <div class="fs" id="fs">-</div>
+          </div>
+          <button type="button" class="rm" id="rm">✕</button>
+        </div>
+      </div>
+      <div class="prog" id="pb"><div class="prog-fill" id="pf"></div></div>
+      <button type="submit" class="submit-btn" id="sb" disabled>
+        <span class="btn-text">⚡ Process Video</span>
+        <div class="spinner"></div>
+      </button>
+    </form>
+    <div class="note">
+      <div class="note-item"><div class="ni">🔒</div><p>Processed locally, not stored</p></div>
+      <div class="note-item"><div class="ni">⚡</div><p>AI ready in under 60s</p></div>
+      <div class="note-item"><div class="ni">📥</div><p>H.264 MP4 download</p></div>
+    </div>
+  </div>
+</div>
+<script>
+const dz=document.getElementById('dz'),vi=document.getElementById('vi'),fr=document.getElementById('fr'),
+fn=document.getElementById('fn'),fs=document.getElementById('fs'),sb=document.getElementById('sb'),
+rm=document.getElementById('rm'),pb=document.getElementById('pb'),pf=document.getElementById('pf'),form=document.getElementById('upForm');
+function fmt(b){return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'}
+function show(f){fn.textContent=f.name;fs.textContent=fmt(f.size);fr.classList.add('show');dz.classList.add('has-file');sb.disabled=false}
+function clear(){vi.value='';fr.classList.remove('show');dz.classList.remove('has-file');sb.disabled=true}
+vi.addEventListener('change',e=>{if(e.target.files[0])show(e.target.files[0])});
+rm.addEventListener('click',clear);
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('video/')){const dt=new DataTransfer();dt.items.add(f);vi.files=dt.files;show(f)}});
+form.addEventListener('submit',()=>{sb.classList.add('loading');sb.disabled=true;pb.classList.add('show');setTimeout(()=>{pf.style.width='90%'},100)});
+</script>
+</body>
+</html>

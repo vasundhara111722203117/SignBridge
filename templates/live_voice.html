@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Studio — SignBridge</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --void:#09090b;--surface:#16161e;--raised:#1e1e2a;
+  --border:rgba(255,255,255,0.07);--border-bright:rgba(255,255,255,0.14);
+  --muted:#52526a;--sub:#7b7b9a;--text:#e8e8f0;--bright:#f4f4f8;
+  --gold:#e8b96a;--gold-dim:rgba(232,185,106,0.15);--gold-glow:rgba(232,185,106,0.25);
+  --ruby:#e05c7a;--ruby-dim:rgba(224,92,122,0.12);
+  --teal:#3ecfb2;--teal-dim:rgba(62,207,178,0.12);
+}
+html,body{height:100%;overflow-x:hidden;background:var(--void)}
+body{font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-mesh::before{content:'';position:absolute;width:900px;height:900px;left:-200px;top:-200px;background:radial-gradient(circle,rgba(232,185,106,0.04) 0%,transparent 65%);animation:drift1 18s ease-in-out infinite alternate}
+.bg-mesh::after{content:'';position:absolute;width:700px;height:700px;right:-150px;bottom:-150px;background:radial-gradient(circle,rgba(62,207,178,0.05) 0%,transparent 65%);animation:drift2 22s ease-in-out infinite alternate}
+.grid-lines{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);background-size:60px 60px}
+@keyframes drift1{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.1)}}
+@keyframes drift2{from{transform:translate(0,0) scale(1)}to{transform:translate(-50px,-60px) scale(1.08)}}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;padding:0 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(9,9,11,0.85);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;color:var(--bright);text-decoration:none;letter-spacing:0.02em}
+.logo em{color:var(--gold);font-style:normal}
+.nav-back{font-size:.78rem;color:var(--muted);text-decoration:none;font-weight:500;letter-spacing:0.04em;transition:color .2s}
+.nav-back:hover{color:var(--text)}
+.shell{position:relative;z-index:1;width:100%;max-width:960px;margin:0 auto;padding:88px 24px 20px;display:grid;grid-template-columns:1fr 1fr;gap:0;animation:revealShell .9s cubic-bezier(.16,1,.3,1) both}
+@keyframes revealShell{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.col-left{padding:48px 44px 48px 0;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.eyebrow::before{content:'';width:28px;height:1px;background:var(--gold);opacity:.5}
+.main-title{font-family:'Cormorant Garamond',serif;font-size:3.6rem;font-weight:300;line-height:1.05;color:var(--bright);letter-spacing:-0.02em;margin-bottom:10px}
+.main-title strong{font-weight:700;display:block;background:linear-gradient(135deg,var(--gold) 0%,#f5d08a 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tagline{font-size:.88rem;color:var(--sub);line-height:1.7;margin-bottom:36px;max-width:300px}
+.status-row{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s,box-shadow .3s;flex-shrink:0}
+.status-dot.ready{background:var(--teal);box-shadow:0 0 0 4px var(--teal-dim)}
+.status-dot.live{background:var(--ruby);box-shadow:0 0 0 4px var(--ruby-dim);animation:blink 1.4s infinite}
+.status-dot.done{background:var(--gold);box-shadow:0 0 0 4px var(--gold-dim)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.status-label{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sub)}
+.mic-wrap{display:inline-flex;align-items:center;gap:20px}
+.mic-btn{width:72px;height:72px;border-radius:50%;border:1.5px solid var(--border-bright);background:var(--raised);color:var(--text);font-size:1.6rem;cursor:pointer;position:relative;overflow:hidden;transition:all .35s cubic-bezier(.16,1,.3,1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mic-btn::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at center,var(--gold-glow) 0%,transparent 70%);opacity:0;transition:opacity .3s}
+.mic-btn:hover{border-color:var(--gold);transform:scale(1.06)}
+.mic-btn:hover::before{opacity:1}
+.mic-btn.listening{border-color:var(--ruby);background:rgba(224,92,122,0.1);animation:micPulse 1.8s ease-in-out infinite}
+.mic-btn.listening::before{background:radial-gradient(circle at center,rgba(224,92,122,0.25) 0%,transparent 70%);opacity:1}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(224,92,122,0.4)}50%{box-shadow:0 0 0 18px rgba(224,92,122,0)}}
+.mic-hint{font-size:.78rem;color:var(--muted);line-height:1.5;font-weight:500}
+.mic-hint span{display:block;color:var(--sub);font-size:.72rem;margin-top:2px}
+.waveform{display:none;align-items:flex-end;gap:3px;height:32px;margin-top:24px}
+.waveform.visible{display:flex}
+.wbar{width:3px;background:var(--ruby);border-radius:3px;height:6px;animation:wvAnim 0.9s ease-in-out infinite}
+.wbar:nth-child(2){animation-delay:.08s}.wbar:nth-child(3){animation-delay:.16s}.wbar:nth-child(4){animation-delay:.24s}
+.wbar:nth-child(5){animation-delay:.12s}.wbar:nth-child(6){animation-delay:.20s}.wbar:nth-child(7){animation-delay:.04s}
+.wbar:nth-child(8){animation-delay:.28s}.wbar:nth-child(9){animation-delay:.10s}.wbar:nth-child(10){animation-delay:.18s}
+@keyframes wvAnim{0%,100%{height:6px}50%{height:28px}}
+.col-right{padding:48px 0 48px 44px;display:flex;flex-direction:column;gap:24px}
+.section-label{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lang-card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;cursor:pointer;transition:all .25s cubic-bezier(.16,1,.3,1);overflow:hidden;user-select:none}
+.lang-card::before{content:'';position:absolute;inset:0;border-radius:14px;background:linear-gradient(135deg,var(--gold-glow) 0%,transparent 60%);opacity:0;transition:opacity .25s}
+.lang-card:hover{border-color:var(--border-bright);transform:translateY(-2px)}
+.lang-card:hover::before{opacity:0.5}
+.lang-card.active{border-color:var(--gold);background:var(--raised)}
+.lang-card.active::before{opacity:1}
+.lang-flag{font-size:1.4rem;margin-bottom:8px;display:block}
+.lang-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--bright);margin-bottom:2px}
+.lang-native{font-size:.8rem;color:var(--sub)}
+.lang-card.active .lang-name{color:var(--gold)}
+.lang-check{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--void);font-weight:700;opacity:0;transform:scale(0);transition:all .2s}
+.lang-card.active .lang-check{opacity:1;transform:scale(1)}
+.output-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 22px;min-height:110px;position:relative;transition:border-color .3s}
+.output-card.has-content{border-color:var(--border-bright)}
+.output-tag{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block}
+.output-lang-tag{position:absolute;top:16px;right:16px;background:var(--gold-dim);border:1px solid rgba(232,185,106,0.25);border-radius:100px;padding:3px 10px;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;color:var(--gold)}
+#output-text{font-size:.95rem;line-height:1.7;color:var(--sub);font-style:italic;min-height:56px}
+#output-text.active-text{color:var(--text);font-style:normal;font-family:'Cormorant Garamond',serif;font-size:1.15rem}
+.action-bar{display:flex;gap:10px;align-items:center;margin-top:10px}
+.speak-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;background:var(--raised);border:1px solid var(--border-bright);color:var(--text);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .25s}
+.speak-btn:hover{background:var(--surface);border-color:var(--teal);color:var(--teal)}
+.speak-btn:disabled{opacity:.35;cursor:not-allowed}
+.clear-btn{width:44px;height:44px;border-radius:12px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.clear-btn:hover{border-color:var(--ruby);color:var(--ruby)}
+.input-lang-wrap{margin-top:28px}
+.input-lang-label{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:10px}
+.input-pills{display:flex;flex-wrap:wrap;gap:6px}
+.ipill{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:5px 12px;font-size:.75rem;font-weight:500;color:var(--sub);cursor:pointer;transition:all .2s;user-select:none}
+.ipill:hover{border-color:var(--border-bright);color:var(--text)}
+.ipill.active{background:var(--raised);border-color:var(--teal);color:var(--teal)}
+.ipill .iflag{font-size:.85rem}
+.bottom-strip{position:relative;z-index:1;width:100%;max-width:960px;margin:0 auto;padding:0 24px 36px;display:flex;align-items:center;justify-content:space-between;animation:revealShell .9s .15s cubic-bezier(.16,1,.3,1) both}
+.credits{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.08em;color:var(--muted)}
+.back-link{font-size:.78rem;color:var(--muted);text-decoration:none;font-weight:500;transition:color .2s}
+.back-link:hover{color:var(--text)}
+#language{display:none}
+@media(max-width:680px){.shell{grid-template-columns:1fr}.col-left{padding:32px 0 28px;border-right:none;border-bottom:1px solid var(--border)}.col-right{padding:28px 0 0}.main-title{font-size:2.6rem}}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="grid-lines"></div>
+<nav>
+  <a href="/index" class="logo">Sign<em>Bridge</em></a>
+  <a href="/index" class="nav-back">Return to Dashboard</a>
+</nav>
+<div class="shell">
+  <div class="col-left">
+    <div class="eyebrow">Live Studio</div>
+    <h1 class="main-title">Speak.<br><strong>Translate.</strong></h1>
+    <p class="tagline">Speak in any South Indian language — translate and hear it in any other instantly.</p>
+    <div class="status-row">
+      <div class="status-dot ready" id="statusDot"></div>
+      <div class="status-label" id="statusLabel">Select a language &amp; tap the mic</div>
+    </div>
+    <div class="mic-wrap">
+      <button class="mic-btn" id="micBtn" onclick="toggleListening()">&#127908;</button>
+      <div class="mic-hint">Tap to speak<span id="micSub">Speak to translate to Tamil</span></div>
+    </div>
+    <div class="waveform" id="waveform">
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div>
+    </div>
+    <div class="input-lang-wrap">
+      <span class="input-lang-label">I will speak in</span>
+      <div class="input-pills">
+        <div class="ipill active" data-stt="en-US"   data-label="English"   onclick="selectInput(this)"><span class="iflag">&#127468;&#127463;</span> English</div>
+        <div class="ipill"        data-stt="ta-IN"   data-label="Tamil"     onclick="selectInput(this)"><span class="iflag">&#127470;&#127475;</span> Tamil</div>
+        <div class="ipill"        data-stt="te-IN"   data-label="Telugu"    onclick="selectInput(this)"><span class="iflag">&#127470;&#127475;</span> Telugu</div>
+        <div class="ipill"        data-stt="kn-IN"   data-label="Kannada"   onclick="selectInput(this)"><span class="iflag">&#127470;&#127475;</span> Kannada</div>
+        <div class="ipill"        data-stt="ml-IN"   data-label="Malayalam" onclick="selectInput(this)"><span class="iflag">&#127470;&#127475;</span> Malayalam</div>
+        <div class="ipill"        data-stt="mr-IN"   data-label="Marathi"   onclick="selectInput(this)"><span class="iflag">&#127470;&#127475;</span> Marathi</div>
+        <div class="ipill"        data-stt="or-IN"   data-label="Odia"      onclick="selectInput(this)"><span class="iflag">&#127470;&#127475;</span> Odia</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-right">
+    <div>
+      <div class="section-label">Output Language</div>
+      <div class="lang-grid">
+        <div class="lang-card active" data-code="ta" onclick="selectLang(this)">
+          <div class="lang-check">&#10003;</div>
+          <span class="lang-flag">&#127802;</span>
+          <div class="lang-name">Tamil</div>
+          <div class="lang-native">&#2980;&#2990;&#3007;&#2996;&#3021;</div>
+        </div>
+        <div class="lang-card" data-code="te" onclick="selectLang(this)">
+          <div class="lang-check">&#10003;</div>
+          <span class="lang-flag">&#127800;</span>
+          <div class="lang-name">Telugu</div>
+          <div class="lang-native">&#3108;&#3142;&#3122;&#3137;&#3095;&#3137;</div>
+        </div>
+        <div class="lang-card" data-code="kn" onclick="selectLang(this)">
+          <div class="lang-check">&#10003;</div>
+          <span class="lang-flag">&#127989;&#65039;</span>
+          <div class="lang-name">Kannada</div>
+          <div class="lang-native">&#3221;&#3240;&#3277;&#3240;&#3233;</div>
+        </div>
+        <div class="lang-card" data-code="ml" onclick="selectLang(this)">
+          <div class="lang-check">&#10003;</div>
+          <span class="lang-flag">&#127807;</span>
+          <div class="lang-name">Malayalam</div>
+          <div class="lang-native">&#3374;&#3378;&#3375;&#3390;&#3379;&#3384;</div>
+        </div>
+        <div class="lang-card" data-code="mr" onclick="selectLang(this)">
+          <div class="lang-check">&#10003;</div>
+          <span class="lang-flag">&#129655;</span>
+          <div class="lang-name">Marathi</div>
+          <div class="lang-native">&#2350;&#2352;&#2366;&#2336;&#2368;</div>
+        </div>
+        <div class="lang-card" data-code="or" onclick="selectLang(this)">
+          <div class="lang-check">&#10003;</div>
+          <span class="lang-flag">&#127804;</span>
+          <div class="lang-name">Odia</div>
+          <div class="lang-native">&#2871;&#2921;&#2952;&#2879;&#2906;</div>
+        </div>
+		<div class="lang-card" data-code="hi" onclick="selectLang(this)">
+		  <div class="lang-check">&#10003;</div>
+		  <span class="lang-flag">&#127470;&#127475;</span>
+		  <div class="lang-name">Hindi</div>
+		  <div class="lang-native">&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;</div>
+		</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label" style="margin-bottom:10px">Transcription &amp; Translation</div>
+      <div class="output-card" id="outputCard">
+        <span class="output-tag">Output</span>
+        <div class="output-lang-tag" id="langTag">Tamil &middot; ta</div>
+        <div id="output-text">Waiting for voice input&hellip;</div>
+      </div>
+      <div class="action-bar">
+        <button class="speak-btn" id="speakBtn" onclick="speakText()" disabled>&#128266; &nbsp;Listen to Translation</button>
+        <button class="clear-btn" onclick="clearOutput()" title="Clear">&#x2715;</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="bottom-strip">
+  <div class="credits">SignBridge &middot; South Indian Voice Studio</div>
+  <a href="/index" class="back-link">&#8592; Home</a>
+</div>
+<select id="language">
+  <option value="en">English</option>
+  <option value="hi">Hindi</option>
+  <option value="ta">Tamil</option>
+  <option value="te">Telugu</option>
+  <option value="kn">Kannada</option>
+  <option value="ml">Malayalam</option>
+  <option value="mr">Marathi</option>
+  <option value="or">Odia</option>
+</select>
+<script>
+const LANG_NAMES={ta:"Tamil",te:"Telugu",kn:"Kannada",ml:"Malayalam",mr:"Marathi",or:"Odia"};
+const TTS_MAP={ta:"ta-IN",te:"te-IN",kn:"kn-IN",ml:"ml-IN",mr:"mr-IN",or:"or-IN"};
+let currentCode="ta",finalText="",recognition=null,isListening=false;
+let inputSttLang="en-US",inputLabel="English";
+const micBtn=document.getElementById("micBtn"),waveform=document.getElementById("waveform"),
+      outputEl=document.getElementById("output-text"),outputCard=document.getElementById("outputCard"),
+      speakBtn=document.getElementById("speakBtn"),statusDot=document.getElementById("statusDot"),
+      statusLbl=document.getElementById("statusLabel"),langTag=document.getElementById("langTag"),
+      micSub=document.getElementById("micSub");
+function setStatus(s,l){statusDot.className="status-dot "+s;statusLbl.textContent=l}
+function selectInput(el){
+  document.querySelectorAll(".ipill").forEach(p=>p.classList.remove("active"));
+  el.classList.add("active");
+  inputSttLang=el.dataset.stt;inputLabel=el.dataset.label;
+  micSub.textContent=inputLabel+" \u2192 "+LANG_NAMES[currentCode];
+  if(isListening){stopListening();setTimeout(startListening,300)}
+}
+function selectLang(el){
+  document.querySelectorAll(".lang-card").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");currentCode=el.dataset.code;
+  document.getElementById("language").value=currentCode;
+  langTag.textContent=LANG_NAMES[currentCode]+" \u00b7 "+currentCode;
+  micSub.textContent=inputLabel+" \u2192 "+LANG_NAMES[currentCode];
+  setStatus("ready","Language set \u2014 ready to listen");
+  if(isListening){stopListening();setTimeout(startListening,300)}
+}
+function stopListening(){
+  if(recognition){try{recognition.stop()}catch(e){}recognition=null}
+  isListening=false;micBtn.classList.remove("listening");waveform.classList.remove("visible")
+}
+function toggleListening(){if(isListening){stopListening();setStatus("ready","Stopped");return}startListening()}
+function startListening(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){outputEl.textContent="Speech recognition not supported. Use Chrome or Edge.";return}
+  recognition=new SR();recognition.lang=inputSttLang;recognition.continuous=false;recognition.interimResults=true;
+  isListening=true;micBtn.classList.add("listening");waveform.classList.add("visible");
+  setStatus("live","Listening\u2026");micSub.textContent="Tap again to stop";
+  outputEl.className="";
+  outputEl.innerHTML='<span style="color:var(--sub);font-style:italic">Speak in '+inputLabel+' \u2192 translating to '+LANG_NAMES[currentCode]+'\u2026</span>';
+  recognition.onresult=e=>{
+    let interim="",final="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      e.results[i].isFinal?(final+=t):(interim+=t)
+    }
+    if(interim&&!final)outputEl.innerHTML='<span style="color:var(--muted);font-style:italic">'+interim+'\u2026</span>';
+    if(final){
+      outputEl.innerHTML='<span style="color:var(--muted);font-size:.78rem;display:block;margin-bottom:8px;font-family:\'DM Mono\',monospace">Heard \u00b7 '+final+'</span><span style="color:var(--sub);font-style:italic">Translating\u2026</span>';
+      fetch("/process_speech",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:final,language:currentCode,input_lang:inputSttLang})})
+      .then(r=>r.json())
+      .then(data=>{
+        finalText=data.translated_text||final;
+        outputEl.className="active-text";
+        outputEl.innerHTML='<span style="color:var(--muted);font-size:.72rem;display:block;margin-bottom:10px;font-family:\'DM Mono\',monospace">'+inputLabel+' \u00b7 '+final+'</span>'+finalText;
+        outputCard.classList.add("has-content");speakBtn.disabled=false;setStatus("done","Translation complete")
+      })
+      .catch(()=>{finalText=final;outputEl.className="active-text";outputEl.textContent=final;speakBtn.disabled=false;setStatus("done","Done")})
+    }
+  };
+  recognition.onend=()=>{
+    isListening=false;micBtn.classList.remove("listening");waveform.classList.remove("visible");
+    micSub.textContent=inputLabel+" \u2192 "+LANG_NAMES[currentCode];
+    if(statusLbl.textContent==="Listening\u2026")setStatus("ready","Ready")
+  };
+  recognition.onerror=e=>{
+    isListening=false;micBtn.classList.remove("listening");waveform.classList.remove("visible");
+    const msgs={"no-speech":"No speech detected. Try again.","not-allowed":"Microphone blocked \u2014 allow access in settings.","network":"Network error.","audio-capture":"No microphone found."};
+    outputEl.className="";outputEl.style.color="var(--ruby)";
+    outputEl.textContent=msgs[e.error]||"Error: "+e.error;setStatus("idle","Error \u2014 try again")
+  };
+  recognition.start()
+}
+function speakText(){
+  if(!finalText)return;
+  const u=new SpeechSynthesisUtterance(finalText);u.lang=TTS_MAP[currentCode]||"en-US";u.rate=0.88;
+  window.speechSynthesis.cancel();window.speechSynthesis.speak(u)
+}
+function clearOutput(){
+  finalText="";outputEl.className="";outputEl.style.color="";
+  outputEl.textContent="Waiting for voice input\u2026";
+  outputCard.classList.remove("has-content");speakBtn.disabled=true;
+  setStatus("ready","Cleared \u2014 ready to listen")
+}
+</script>
+</body>
+</html>

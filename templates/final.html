@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Download Ready — SignBridge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--cream:#faf7f2;--warm:#fff9f2;--sand:#f0e8d8;--tan:#e4d5bc;--bark:#c4a882;--brown:#8b6a42;--espresso:#3d2b1a;--accent:#c44b1e;--teal:#1a7a6e;--text:#2a1f14;--muted:#7a6652}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--cream);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;display:flex;flex-direction:column;min-height:100vh}
+nav{height:68px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--tan);flex-shrink:0}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;color:var(--espresso);text-decoration:none}
+.logo em{color:var(--accent);font-style:normal}
+.back{color:var(--muted);font-size:.85rem;text-decoration:none}
+
+.main-wrap{flex:1;display:grid;grid-template-columns:1fr 420px;overflow:hidden}
+.left-panel{background:#111;display:flex;flex-direction:column;overflow:hidden}
+.video-header{padding:16px 24px;background:var(--espresso);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.vh-title{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:800;color:#fff}
+.ready-badge{background:rgba(26,122,110,.35);border:1px solid rgba(26,122,110,.55);color:#6dffd2;border-radius:100px;padding:4px 14px;font-size:.78rem;font-weight:600}
+.video-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:28px;overflow:hidden}
+video{max-width:100%;max-height:100%;border-radius:10px}
+.video-hint{padding:12px 24px;background:rgba(255,255,255,.04);font-size:.78rem;color:rgba(255,255,255,.4);text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px}
+.hint-dot{width:6px;height:6px;background:#6dffd2;border-radius:50%;flex-shrink:0}
+.right-panel{background:#fff;overflow-y:auto;padding:40px 36px;display:flex;flex-direction:column;border-left:1px solid var(--tan)}
+.confetti{font-size:2.5rem;margin-bottom:20px;display:inline-block;animation:pop .6s cubic-bezier(.16,1,.3,1) both}
+@keyframes pop{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.panel-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--espresso);letter-spacing:-.5px;margin-bottom:10px}
+.panel-sub{color:var(--muted);font-size:.88rem;line-height:1.65;margin-bottom:28px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.stat-card{background:var(--sand);border:1px solid var(--tan);border-radius:12px;padding:16px}
+.sv{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--espresso)}
+.sl{font-size:.73rem;color:var(--muted);margin-top:3px}
+.dl-section{background:var(--espresso);border-radius:16px;padding:28px;margin-bottom:16px;position:relative;overflow:hidden}
+.dl-section::before{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;background:rgba(255,255,255,.04);border-radius:50%}
+.dl-section::after{content:'';position:absolute;right:40px;bottom:-20px;width:80px;height:80px;background:rgba(255,255,255,.03);border-radius:50%}
+.dl-label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:10px}
+.dl-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:6px}
+.dl-desc{font-size:.8rem;color:rgba(255,255,255,.6);margin-bottom:22px;line-height:1.55}
+.dl-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:var(--espresso);border-radius:10px;padding:15px 24px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.92rem;text-decoration:none;transition:all .2s;border:none;cursor:pointer;width:100%;position:relative;z-index:1}
+.dl-btn:hover{background:var(--sand);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.format-note{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border-radius:8px;padding:10px 14px;margin-top:14px;font-size:.74rem;color:rgba(255,255,255,.55);position:relative;z-index:1}
+.format-note strong{color:rgba(255,255,255,.9)}
+.sec-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sec-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--sand);border:1px solid var(--tan);color:var(--brown);border-radius:10px;padding:13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.sec-btn:hover{border-color:var(--bark);color:var(--espresso);background:var(--tan)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">Sign<em>Bridge</em></a>
+  <a href="/index" class="back">← Home</a>
+
+</nav>
+<div class="main-wrap">
+  <div class="left-panel">
+    <div class="video-header">
+      <div class="vh-title">🎬 Final — Original + Sign Language (Side by Side)</div>
+      <div class="ready-badge">✓ Ready</div>
+    </div>
+    <div class="video-wrap">
+      <video controls>
+        <source src="/uploads/final.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-hint">
+      <div class="hint-dot"></div>
+      Sign language panel appears to the right — zero overlay on original content
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="confetti">🎉</div>
+    <div class="panel-title">Your Video<br>Is Ready!</div>
+    <p class="panel-sub">Sign language merged side-by-side with your original. Both tracks play in perfect sync — H.264 / AAC encoded, plays everywhere.</p>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="sv">{{original_time}}s</div><div class="sl">Original Duration</div></div>
+      <div class="stat-card"><div class="sv">{{sign_time}}s</div><div class="sl">Sign Duration</div></div>
+      <div class="stat-card"><div class="sv">{{speed_value}}×</div><div class="sl">Speed Applied</div></div>
+      <div class="stat-card"><div class="sv">H.264</div><div class="sl">Output Codec</div></div>
+    </div>
+    <div class="dl-section">
+      <div class="dl-label">Download Output File</div>
+      <div class="dl-title">signbridge_final.mp4</div>
+      <p class="dl-desc">H.264 video + AAC audio. Side-by-side layout. Plays in Chrome, Safari, Firefox, VLC, and all modern players with no codec issues.</p>
+      <button class="dl-btn" onclick="startDownload()">⬇ Download Video</button>      <div class="format-note">Codec: <strong>H.264 / AAC · MP4</strong> — no IPCM, no PCM, no compatibility issues</div>
+    </div>
+    <div class="sec-actions">
+      <a href="/upload" class="sec-btn">🔁 New Sign Video</a>
+      <a href="/" class="sec-btn">🏠 Home</a>
+    </div>
+  </div>
+
+  <script>
+function startDownload() {
+
+    // 1️⃣ Send email alert immediately
+    fetch("/download_alert", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            email: "{{ user_email }}",
+        })
+    });
+
+    // 2️⃣ Start actual download
+    window.location.href = "/download";
+}
+</script>
+  
+</div>
+</body>
+</html>

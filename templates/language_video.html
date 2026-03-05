@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multilingual Subtitles — SignBridge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--cream:#faf7f2;--warm:#fff9f2;--sand:#f0e8d8;--tan:#e4d5bc;--bark:#c4a882;--brown:#8b6a42;--espresso:#3d2b1a;--accent:#c44b1e;--teal:#1a7a6e;--text:#2a1f14;--muted:#7a6652}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--cream);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;display:flex;flex-direction:column;min-height:100vh}
+nav{height:68px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--tan);flex-shrink:0}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;color:var(--espresso);text-decoration:none}
+.logo em{color:var(--accent);font-style:normal}
+.back{color:var(--muted);font-size:.85rem;text-decoration:none}
+.main-wrap{flex:1;display:grid;grid-template-columns:1fr 500px;overflow:hidden}
+
+/* LEFT PANEL */
+.left-panel{position:relative;overflow:hidden}
+.left-bg{position:absolute;inset:0;background-image:url('https://images.pexels.com/photos/4145154/pexels-photo-4145154.jpeg?auto=compress&cs=tinysrgb&w=1200');background-size:cover;background-position:center}
+.left-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(61,43,26,.85) 0%,rgba(26,122,110,.5) 100%)}
+.left-content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:center;padding:48px 44px;overflow-y:auto}
+.lc-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:100px;padding:6px 16px;font-size:.78rem;font-weight:600;margin-bottom:20px;width:fit-content}
+.lc-title{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:#fff;line-height:1.1;margin-bottom:14px}
+.lc-desc{color:rgba(255,255,255,.75);font-size:.88rem;line-height:1.7;max-width:360px;margin-bottom:22px}
+.lang-count{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:4px 12px;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:18px}
+.lang-group-label{font-size:.65rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;margin-top:16px}
+.lang-pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px}
+.lpill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(6px);color:#fff;border-radius:100px;padding:6px 14px;font-size:.8rem;font-weight:500;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .2s}
+.lpill:hover,.lpill.active{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.5);font-weight:700}
+.preview-box{margin-top:22px;background:rgba(255,255,255,.1);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px}
+.pb-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px}
+.pb-text{font-size:.95rem;color:#fff;line-height:1.65;font-style:italic;min-height:48px;transition:opacity .2s ease}
+
+/* RIGHT PANEL */
+.right-panel{background:#fff;overflow-y:auto;padding:32px 32px;display:flex;flex-direction:column;border-left:1px solid var(--tan)}
+.step-tag{display:inline-flex;align-items:center;gap:6px;background:var(--sand);border:1px solid var(--tan);border-radius:100px;padding:5px 14px;font-size:.75rem;color:var(--brown);font-weight:600;margin-bottom:12px}
+.form-title{font-family:'Playfair Display',serif;font-size:1.65rem;font-weight:800;color:var(--espresso);letter-spacing:-.5px;margin-bottom:6px}
+.form-sub{color:var(--muted);font-size:.84rem;line-height:1.6;margin-bottom:16px}
+
+/* UPLOAD TYPE TABS */
+.upload-tabs{display:flex;background:var(--cream);border:1px solid var(--tan);border-radius:13px;padding:4px;gap:4px;margin-bottom:16px}
+.utab{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:10px;font-size:.84rem;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:transparent;transition:all .22s;font-family:'Plus Jakarta Sans',sans-serif}
+.utab:hover{color:var(--espresso)}
+.utab.active{background:#fff;box-shadow:0 2px 10px rgba(61,43,26,.1)}
+.utab-video.active{color:var(--teal)}
+.utab-audio.active{color:var(--accent)}
+
+.upload-panel{display:none}
+.upload-panel.show{display:block}
+
+/* UPLOAD ZONES */
+.upload-zone{border:2px dashed var(--tan);border-radius:16px;padding:26px 20px;text-align:center;cursor:pointer;transition:all .25s;background:var(--cream);margin-bottom:14px}
+.vzone:hover,.vzone.over{border-color:var(--teal);background:rgba(26,122,110,.03)}
+.vzone.has-file{border-color:var(--teal);border-style:solid;background:rgba(26,122,110,.03)}
+.azone:hover,.azone.over{border-color:var(--accent);background:rgba(196,75,30,.03)}
+.azone.has-file{border-color:var(--accent);border-style:solid;background:rgba(196,75,30,.03)}
+.u-icon{font-size:1.8rem;margin-bottom:8px;display:block}
+.u-title{font-family:'Playfair Display',serif;font-size:.93rem;font-weight:800;color:var(--espresso);margin-bottom:4px}
+.u-sub{color:var(--muted);font-size:.76rem;margin-bottom:13px;line-height:1.5}
+.browse-label{display:inline-block;color:#fff;border-radius:8px;padding:8px 18px;font-size:.79rem;font-weight:600;cursor:pointer;transition:background .2s}
+.vb{background:var(--espresso)}
+.vb:hover{background:var(--teal)}
+.ab{background:var(--accent)}
+.ab:hover{background:#a83d16}
+input[type=file]{display:none}
+
+.file-row{display:none;align-items:center;gap:11px;border-radius:10px;padding:10px 13px;margin-top:11px}
+.file-row.show{display:flex}
+.vfr{background:rgba(26,122,110,.06)}
+.afr{background:rgba(196,75,30,.05)}
+.fi{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.vfi{background:rgba(26,122,110,.12)}
+.afi{background:rgba(196,75,30,.12)}
+.fn{flex:1;font-size:.81rem;font-weight:600;color:var(--espresso);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fz{font-size:.71rem;color:var(--muted)}
+.rm{background:rgba(196,75,30,.1);border:none;color:var(--accent);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.73rem;transition:background .2s}
+.rm:hover{background:rgba(196,75,30,.2)}
+
+/* Audio note */
+.audio-note{display:flex;align-items:flex-start;gap:9px;background:var(--warm);border:1px solid var(--tan);border-radius:10px;padding:10px 13px;margin-bottom:13px;font-size:.77rem;color:var(--muted);line-height:1.55}
+.audio-note strong{color:var(--brown)}
+
+/* Language section */
+.fl-label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bark);margin-bottom:9px;display:block}
+.lang-section-divider{display:flex;align-items:center;gap:8px;margin:12px 0 9px}
+.lang-section-divider span{font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bark);white-space:nowrap}
+.lang-section-divider::before,.lang-section-divider::after{content:'';flex:1;height:1px;background:var(--tan)}
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:5px}
+.lang-opt{position:relative}
+.lang-opt input{display:none}
+.lang-opt label{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--cream);border:1.5px solid var(--tan);border-radius:12px;padding:11px 5px;cursor:pointer;transition:all .2s;font-size:.74rem;color:var(--muted);text-align:center}
+.lang-opt input:checked+label{background:var(--sand);border-color:var(--bark);color:var(--espresso)}
+.lang-opt label:hover{border-color:var(--bark);color:var(--espresso);background:var(--sand)}
+.lang-flag{font-size:1.15rem}
+.lang-name{font-weight:700;color:var(--espresso);font-size:.76rem}
+.lang-sample{font-size:.66rem;color:var(--muted);margin-top:1px}
+.new-badge{position:absolute;top:4px;right:4px;background:var(--accent);color:#fff;border-radius:100px;padding:1px 6px;font-size:.53rem;font-weight:800;letter-spacing:.04em}
+
+.submit-btn{width:100%;background:var(--espresso);color:#fff;border:none;border-radius:12px;padding:15px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px}
+.submit-btn:hover{background:var(--teal);transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,122,110,.25)}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:none}
+.loading .spinner{display:block}
+.loading .btn-text{display:none}
+.prog{height:3px;background:var(--sand);border-radius:100px;margin-top:10px;overflow:hidden;display:none}
+.prog.show{display:block}
+.prog-fill{height:100%;background:var(--teal);border-radius:100px;width:0;transition:width 2s ease}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">Sign<em>Bridge</em></a>
+  <a href="/index" class="back">← Home</a>
+</nav>
+<div class="main-wrap">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="left-bg"></div>
+    <div class="left-content">
+      <div class="lc-tag">🌐 Multilingual Mode</div>
+      <div class="lc-title">Subtitles in<br>Your Language</div>
+      <p class="lc-desc">Upload a <strong style="color:#fff">video</strong> or <strong style="color:#fff">audio</strong> file. We'll transcribe the speech and generate a professional .srt subtitle file in your chosen language.</p>
+      <div class="lang-count">🗣️ 9 Languages &nbsp;·&nbsp; 📹 Video &amp; 🎵 Audio</div>
+
+      <div class="lang-group-label">South Indian</div>
+      <div class="lang-pills">
+        <div class="lpill active" data-lang="en" onclick="setPreview(this,'Hello, welcome to today\'s video.')">🇬🇧 English</div>
+        <div class="lpill" data-lang="ta" onclick="setPreview(this,'வணக்கம், இன்றைய வீடியோவிற்கு வரவேற்கிறேன்.')">🇮🇳 Tamil</div>
+        <div class="lpill" data-lang="te" onclick="setPreview(this,'నమస్కారం, నేటి వీడియోకి స్వాగతం.')">🇮🇳 Telugu</div>
+        <div class="lpill" data-lang="ml" onclick="setPreview(this,'ഹലോ, ഇന്നത്തെ വീഡിയോയിലേക്ക് സ്വാഗതം.')">🇮🇳 Malayalam</div>
+        <div class="lpill" data-lang="kn" onclick="setPreview(this,'ನಮಸ್ಕಾರ, ಇಂದಿನ ವೀಡಿಯೊಗೆ ಸ್ವಾಗತ.')">🇮🇳 Kannada</div>
+      </div>
+
+      <div class="lang-group-label">North &amp; East Indian</div>
+      <div class="lang-pills">
+        <div class="lpill" data-lang="hi" onclick="setPreview(this,'नमस्ते, आज के वीडियो में आपका स्वागत है।')">🇮🇳 Hindi</div>
+        <div class="lpill" data-lang="or" onclick="setPreview(this,'ନମସ୍କାର, ଆଜିର ଭିଡିଓକୁ ସ୍ୱାଗତ।')">🇮🇳 Odia</div>
+        <div class="lpill" data-lang="mr" onclick="setPreview(this,'नमस्कार, आजच्या व्हिडिओमध्ये आपले स्वागत आहे.')">🇮🇳 Marathi</div>
+        <div class="lpill" data-lang="as" onclick="setPreview(this,'নমস্কাৰ, আজিৰ ভিডিঅলৈ স্বাগতম।')">🇮🇳 Assamese</div>
+      </div>
+
+      <div class="preview-box">
+        <div class="pb-label">Subtitle Preview</div>
+        <div class="pb-text" id="previewText">Hello, welcome to today's video.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="step-tag">🌐 Subtitle Generator</div>
+    <div class="form-title">Upload &amp; Select Language</div>
+    <p class="form-sub">Upload a video <em>or</em> audio file, pick a language, and we'll generate your .srt subtitle file.</p>
+
+    <form action="/language_trans" method="POST" enctype="multipart/form-data" id="lf">
+      <input type="hidden" name="input_type" id="inputType" value="video">
+
+      <!-- TABS -->
+      <div class="upload-tabs">
+        <button type="button" class="utab utab-video active" id="tabVideo" onclick="switchTab('video')">
+          📹 &nbsp;Video
+        </button>
+        <button type="button" class="utab utab-audio" id="tabAudio" onclick="switchTab('audio')">
+          🎵 &nbsp;Audio
+        </button>
+      </div>
+
+      <!-- VIDEO PANEL -->
+      <div class="upload-panel show" id="panelVideo">
+        <div class="upload-zone vzone" id="dzV">
+          <span class="u-icon">📽️</span>
+          <div class="u-title">Drop video here</div>
+          <p class="u-sub">MP4 · MOV · AVI · MKV<br>Up to 500MB</p>
+          <label class="browse-label vb" for="viV">Choose video</label>
+          <input type="file" name="video" id="viV" accept="video/*">
+          <div class="file-row vfr" id="frV">
+            <div class="fi vfi">🎬</div>
+            <div style="flex:1;min-width:0">
+              <div class="fn" id="fnV">-</div>
+              <div class="fz" id="fzV">-</div>
+            </div>
+            <button type="button" class="rm" id="rmV">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDIO PANEL -->
+      <div class="upload-panel" id="panelAudio">
+        <div class="audio-note">
+          <span>ℹ️</span>
+          <span><strong>Audio mode:</strong> Upload any audio file. Subtitles are generated from the speech and output as a .srt file you can use with any video player or editor.</span>
+        </div>
+        <div class="upload-zone azone" id="dzA">
+          <span class="u-icon">🎙️</span>
+          <div class="u-title">Drop audio here</div>
+          <p class="u-sub">MP3 · WAV · M4A · OGG · FLAC<br>Up to 500MB</p>
+          <label class="browse-label ab" for="viA">Choose audio</label>
+          <input type="file" name="audio" id="viA" accept="audio/*" disabled>
+          <div class="file-row afr" id="frA">
+            <div class="fi afi">🎵</div>
+            <div style="flex:1;min-width:0">
+              <div class="fn" id="fnA">-</div>
+              <div class="fz" id="fzA">-</div>
+            </div>
+            <button type="button" class="rm" id="rmA">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANGUAGE GRID -->
+      <span class="fl-label">Select Output Language</span>
+      <div class="lang-section-divider"><span>Core Languages</span></div>
+      <div class="lang-grid">
+        <div class="lang-opt"><input type="radio" name="language" value="en-US" id="en" checked><label for="en"><span class="lang-flag">🇬🇧</span><span class="lang-name">English</span><span class="lang-sample">Hello</span></label></div>
+        <div class="lang-opt"><input type="radio" name="language" value="ta-IN" id="ta"><label for="ta"><span class="lang-flag">🇮🇳</span><span class="lang-name">Tamil</span><span class="lang-sample">வணக்கம்</span></label></div>
+        <div class="lang-opt"><input type="radio" name="language" value="ml-IN" id="ml"><label for="ml"><span class="lang-flag">🇮🇳</span><span class="lang-name">Malayalam</span><span class="lang-sample">ഹലോ</span></label></div>
+        <div class="lang-opt"><input type="radio" name="language" value="te-IN" id="te"><label for="te"><span class="lang-flag">🇮🇳</span><span class="lang-name">Telugu</span><span class="lang-sample">నమస్కారం</span></label></div>
+        <div class="lang-opt"><input type="radio" name="language" value="kn-IN" id="kn"><label for="kn"><span class="lang-flag">🇮🇳</span><span class="lang-name">Kannada</span><span class="lang-sample">ನಮಸ್ಕಾರ</span></label></div>
+        <div class="lang-opt"><input type="radio" name="language" value="hi-IN" id="hi"><label for="hi"><span class="lang-flag">🇮🇳</span><span class="lang-name">Hindi</span><span class="lang-sample">नमस्ते</span></label></div>
+      </div>
+
+      <div class="lang-section-divider"><span>New Languages</span></div>
+      <div class="lang-grid">
+        <div class="lang-opt">
+          <span class="new-badge">NEW</span>
+          <input type="radio" name="language" value="or-IN" id="or">
+          <label for="or"><span class="lang-flag">🇮🇳</span><span class="lang-name">Odia</span><span class="lang-sample">ନମସ୍କାର</span></label>
+        </div>
+        <div class="lang-opt">
+          <span class="new-badge">NEW</span>
+          <input type="radio" name="language" value="mr-IN" id="mr">
+          <label for="mr"><span class="lang-flag">🇮🇳</span><span class="lang-name">Marathi</span><span class="lang-sample">नमस्कार</span></label>
+        </div>
+        <div class="lang-opt">
+          <span class="new-badge">NEW</span>
+          <input type="radio" name="language" value="as-IN" id="as">
+          <label for="as"><span class="lang-flag">🇮🇳</span><span class="lang-name">Assamese</span><span class="lang-sample">নমস্কাৰ</span></label>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="sb" disabled>
+        <span class="btn-text">🌐 Generate Subtitles</span>
+        <div class="spinner"></div>
+      </button>
+      <div class="prog" id="pb"><div class="prog-fill" id="pf"></div></div>
+    </form>
+  </div>
+</div>
+
+<script>
+let currentTab = 'video';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('inputType').value = tab;
+  document.getElementById('tabVideo').classList.toggle('active', tab === 'video');
+  document.getElementById('tabAudio').classList.toggle('active', tab === 'audio');
+  document.getElementById('panelVideo').classList.toggle('show', tab === 'video');
+  document.getElementById('panelAudio').classList.toggle('show', tab === 'audio');
+  // Enable/disable inputs so only the active one submits
+  document.getElementById('viV').disabled = (tab !== 'video');
+  document.getElementById('viA').disabled = (tab !== 'audio');
+  updateSubmit();
+}
+
+function fmt(b){ return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'; }
+function updateSubmit(){
+  const vf = document.getElementById('viV'), af = document.getElementById('viA');
+  const hasFile = currentTab==='video' ? (vf.files&&vf.files[0]) : (af.files&&af.files[0]);
+  document.getElementById('sb').disabled = !hasFile;
+}
+
+/* VIDEO zone */
+const dzV=document.getElementById('dzV'),viV=document.getElementById('viV'),
+      frV=document.getElementById('frV'),fnV=document.getElementById('fnV'),
+      fzV=document.getElementById('fzV'),rmV=document.getElementById('rmV');
+function showV(f){fnV.textContent=f.name;fzV.textContent=fmt(f.size);frV.classList.add('show');dzV.classList.add('has-file');updateSubmit();}
+function clearV(){viV.value='';frV.classList.remove('show');dzV.classList.remove('has-file');updateSubmit();}
+viV.addEventListener('change',e=>{if(e.target.files[0])showV(e.target.files[0]);});
+rmV.addEventListener('click',clearV);
+dzV.addEventListener('dragover',e=>{e.preventDefault();dzV.classList.add('over');});
+dzV.addEventListener('dragleave',()=>dzV.classList.remove('over'));
+dzV.addEventListener('drop',e=>{
+  e.preventDefault();dzV.classList.remove('over');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('video/')){const dt=new DataTransfer();dt.items.add(f);viV.files=dt.files;showV(f);}
+});
+
+/* AUDIO zone */
+const dzA=document.getElementById('dzA'),viA=document.getElementById('viA'),
+      frA=document.getElementById('frA'),fnA=document.getElementById('fnA'),
+      fzA=document.getElementById('fzA'),rmA=document.getElementById('rmA');
+function showA(f){fnA.textContent=f.name;fzA.textContent=fmt(f.size);frA.classList.add('show');dzA.classList.add('has-file');updateSubmit();}
+function clearA(){viA.value='';frA.classList.remove('show');dzA.classList.remove('has-file');updateSubmit();}
+viA.addEventListener('change',e=>{if(e.target.files[0])showA(e.target.files[0]);});
+rmA.addEventListener('click',clearA);
+dzA.addEventListener('dragover',e=>{e.preventDefault();dzA.classList.add('over');});
+dzA.addEventListener('dragleave',()=>dzA.classList.remove('over'));
+dzA.addEventListener('drop',e=>{
+  e.preventDefault();dzA.classList.remove('over');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('audio/')){const dt=new DataTransfer();dt.items.add(f);viA.files=dt.files;showA(f);}
+});
+
+/* Form submit */
+document.getElementById('lf').addEventListener('submit',()=>{
+  const sb=document.getElementById('sb');
+  sb.classList.add('loading');sb.disabled=true;
+  const pb=document.getElementById('pb'),pf=document.getElementById('pf');
+  pb.classList.add('show');
+  setTimeout(()=>{pf.style.width='88%';},100);
+});
+
+/* Language preview pills */
+function setPreview(el,text){
+  document.querySelectorAll('.lpill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const pt=document.getElementById('previewText');
+  pt.style.opacity=0;
+  setTimeout(()=>{pt.textContent=text;pt.style.opacity=1;},200);
+  const radio=document.getElementById(el.dataset.lang);
+  if(radio)radio.checked=true;
+}
+document.getElementById('previewText').style.transition='opacity .2s';
+</script>
+</body>
+</html>

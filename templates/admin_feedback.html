@@ -1,0 +1,20 @@
+<h2>Customer Feedback</h2>
+
+<table border="1" cellpadding="10">
+<tr>
+    <th>Order ID</th>
+    <th>Rating</th>
+    <th>Comment</th>
+    <th>Date</th>
+</tr>
+
+{% for f in feedbacks %}
+<tr>
+    <td>{{ f[1] }}</td>
+    <td>{{ f[2] }}/5</td>
+    <td>{{ f[3] }}</td>
+    <td>{{ f[4] }}</td>
+</tr>
+{% endfor %}
+
+</table>

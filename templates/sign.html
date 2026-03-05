@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Video Preview — SignBridge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--cream:#faf7f2;--warm:#fff9f2;--sand:#f0e8d8;--tan:#e4d5bc;--bark:#c4a882;--brown:#8b6a42;--espresso:#3d2b1a;--accent:#c44b1e;--teal:#1a7a6e;--text:#2a1f14;--muted:#7a6652}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--cream);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;display:flex;flex-direction:column;min-height:100vh}
+nav{height:68px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--tan);flex-shrink:0}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;color:var(--espresso);text-decoration:none}
+.logo em{color:var(--accent);font-style:normal}
+.back{color:var(--muted);font-size:.85rem;text-decoration:none}
+.main-wrap{flex:1;display:grid;grid-template-columns:1fr 400px;overflow:hidden}
+.left-panel{background:#111;display:flex;flex-direction:column;overflow:hidden}
+.video-header{padding:16px 24px;background:var(--espresso);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.vh-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:800;color:#fff}
+.speed-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);border-radius:100px;padding:4px 14px;font-size:.78rem;font-weight:600}
+.video-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden}
+video{max-width:100%;max-height:100%;border-radius:10px}
+.video-hint{padding:12px 24px;background:rgba(255,255,255,.05);font-size:.78rem;color:rgba(255,255,255,.45);text-align:center;flex-shrink:0}
+.right-panel{background:#fff;overflow-y:auto;padding:40px 36px;display:flex;flex-direction:column;border-left:1px solid var(--tan)}
+.step-tag{display:inline-flex;align-items:center;gap:6px;background:var(--sand);border:1px solid var(--tan);border-radius:100px;padding:5px 14px;font-size:.75rem;color:var(--brown);font-weight:600;margin-bottom:16px}
+.panel-title{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:800;color:var(--espresso);letter-spacing:-.5px;margin-bottom:8px}
+.panel-sub{color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:28px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.stat-card{background:var(--sand);border:1px solid var(--tan);border-radius:12px;padding:16px}
+.sv{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--espresso)}
+.sl{font-size:.75rem;color:var(--muted);margin-top:3px}
+.text-preview{background:var(--cream);border:1px solid var(--tan);border-left:4px solid var(--accent);border-radius:12px;padding:18px;margin-bottom:24px}
+.tp-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bark);margin-bottom:8px}
+.tp-text{font-size:.88rem;color:var(--espresso);line-height:1.65;font-style:italic}
+.divider{height:1px;background:var(--tan);margin-bottom:24px}
+.action-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:800;color:var(--espresso);margin-bottom:6px}
+.action-desc{color:var(--muted);font-size:.82rem;margin-bottom:18px;line-height:1.6}
+.merge-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--espresso);color:#fff;border:none;border-radius:10px;padding:16px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:12px}
+.merge-btn:hover{background:var(--accent);transform:translateY(-1px);box-shadow:0 8px 24px rgba(196,75,30,.25)}
+.sec-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:transparent;border:1.5px solid var(--tan);color:var(--muted);border-radius:10px;padding:13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;text-decoration:none;transition:all .2s}
+.sec-btn:hover{border-color:var(--bark);color:var(--espresso)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">Sign<em>Bridge</em></a>
+  <a href="/index" class="back">← Home</a>
+</nav>
+<div class="main-wrap">
+  <div class="left-panel">
+    <div class="video-header">
+      <div class="vh-title">🤟 Sign Language Preview</div>
+      <div class="speed-badge">{{ speed_value }}× speed</div>
+    </div>
+    <div class="video-wrap">
+      <video controls>
+        <source src="{{ url_for('uploaded_file', filename=sign_file) }}" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-hint">Preview only — merge with original to get the final side-by-side video</div>
+  </div>
+  <div class="right-panel">
+    <div class="step-tag">Step 3 of 4</div>
+    <div class="panel-title">Sign Language<br>Generated</div>
+    <p class="panel-sub">AI has created the sign video. Review it on the left, then merge with your original.</p>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="sv">{{ original_time }}s</div><div class="sl">Original Duration</div></div>
+      <div class="stat-card"><div class="sv">{{ sign_time }}s</div><div class="sl">Sign Duration</div></div>
+      <div class="stat-card"><div class="sv">{{ speed_value }}×</div><div class="sl">Speed Applied</div></div>
+      <div class="stat-card"><div class="sv">H.264</div><div class="sl">Output Codec</div></div>
+    </div>
+    {% if recognized_text %}
+    <div class="text-preview">
+      <div class="tp-label">Recognized Speech</div>
+      <div class="tp-text">"{{ recognized_text }}"</div>
+    </div>
+    {% endif %}
+    <div class="divider"></div>
+    <div class="action-title">Merge with Original Video</div>
+    <p class="action-desc">Combines both videos side-by-side into one H.264 / AAC MP4 — plays in any browser, VLC, or media player. No IPCM encoding issues.</p>
+    <form action="/merge" method="post">
+      <button type="submit" class="merge-btn">⚡ Merge &amp; Prepare Download</button>
+    </form>
+    <a href="/" class="sec-btn">← Start Over</a>
+  </div>
+</div>
+</body>
+</html>

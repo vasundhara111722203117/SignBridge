@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview & Subtitles — SignBridge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f7f4ef;--white:#fff;--ink:#1a1612;--ink2:#3d3830;--muted:#8a8278;
+  --accent:#c8773a;--accent2:#2e6b5e;--accent-light:#fdf0e6;
+  --green-light:#f0f7f5;--border:#e8e2d9;
+  --shadow:0 2px 16px rgba(26,22,18,.08);--shadow-lg:0 8px 40px rgba(26,22,18,.14)
+}
+html,body{width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+
+/* NAV */
+nav{background:rgba(247,244,239,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 48px;height:64px;display:flex;align-items:center;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;color:var(--ink);text-decoration:none}
+.logo em{color:var(--accent);font-style:normal}
+.back{margin-left:auto;color:var(--muted);font-size:.84rem;text-decoration:none;font-weight:500;transition:color .2s}
+.back:hover{color:var(--ink)}
+
+/* HERO STRIP */
+.hero-strip{background:linear-gradient(135deg,var(--accent),#a85e28);padding:24px 64px;display:flex;align-items:center;gap:20px;overflow:hidden;position:relative}
+.hero-strip::after{content:'';position:absolute;right:-50px;top:-50px;width:220px;height:220px;background:rgba(255,255,255,.07);border-radius:50%}
+.confetti{font-size:2.2rem;flex-shrink:0}
+.strip-text h1{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:3px}
+.strip-text p{color:rgba(255,255,255,.72);font-size:.83rem;line-height:1.5}
+.strip-badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.sbadge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:100px;padding:4px 12px;font-size:.72rem;font-weight:700;color:#fff}
+
+/* MAIN LAYOUT */
+main{padding:32px 52px;max-width:1280px;margin:0 auto;width:100%;flex:1}
+.layout{display:grid;grid-template-columns:1fr 330px;gap:22px;align-items:start}
+
+/* ═══════════════════════════════════
+   PLAYER CARD (left)
+═══════════════════════════════════ */
+.player-card{background:var(--white);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:var(--shadow-lg)}
+
+.player-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.ph-ic{width:36px;height:36px;background:var(--green-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.ph-info h2{font-family:'Playfair Display',serif;font-weight:800;font-size:.9rem;color:var(--ink);margin-bottom:1px}
+.ph-info p{font-size:.7rem;color:var(--muted)}
+.live-pill{margin-left:auto;display:flex;align-items:center;gap:5px;background:#fff5f0;border:1px solid rgba(200,119,58,.25);color:var(--accent);border-radius:100px;padding:3px 11px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.live-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* VIDEO BOX */
+.video-box{background:#0d0d0d;padding:14px 18px;display:flex;justify-content:center;align-items:center;min-height:180px}
+#vid{width:100%;max-height:340px;object-fit:contain;border-radius:8px;display:block}
+
+/* ── AUDIO PLAYER BOX ── */
+.audio-box{background:#111;padding:28px 28px 22px;display:flex;flex-direction:column;gap:16px}
+
+/* Album-art style icon */
+.audio-art{width:72px;height:72px;background:linear-gradient(135deg,var(--accent2),#1a4a40);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.audio-info{flex:1;min-width:0}
+.audio-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:800;color:#fff;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.audio-meta{font-size:.72rem;color:rgba(255,255,255,.45)}
+.audio-top{display:flex;align-items:center;gap:16px}
+
+/* ANIMATED WAVEFORM (decorative bars that respond to play state) */
+.wave-viz{display:flex;align-items:center;gap:2.5px;height:44px;padding:0 2px}
+.wv-bar{width:3px;background:rgba(46,107,94,.5);border-radius:100px;transition:height .1s ease}
+.wv-bar.playing{animation:wvPulse var(--spd,0.6s) ease-in-out infinite alternate}
+@keyframes wvPulse{from{opacity:.35}to{opacity:1;transform:scaleY(1.6);transform-origin:bottom}}
+
+/* CUSTOM CONTROLS */
+.audio-controls{display:flex;align-items:center;gap:12px}
+.ctrl-btn{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.1);color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.ctrl-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.08)}
+.ctrl-btn.play-btn{width:52px;height:52px;background:var(--accent2);font-size:1.3rem}
+.ctrl-btn.play-btn:hover{background:#256057}
+
+/* Seek bar */
+.seek-wrap{flex:1;display:flex;flex-direction:column;gap:4px}
+.seek-track{height:5px;background:rgba(255,255,255,.12);border-radius:100px;cursor:pointer;position:relative;overflow:hidden}
+.seek-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:100px;width:0%;transition:width .2s linear;pointer-events:none}
+.time-row{display:flex;justify-content:space-between;font-size:.67rem;color:rgba(255,255,255,.38);font-variant-numeric:tabular-nums}
+
+/* Volume */
+.vol-wrap{display:flex;align-items:center;gap:7px}
+.vol-icon{font-size:.85rem;color:rgba(255,255,255,.45)}
+.vol-track{width:56px;height:4px;background:rgba(255,255,255,.12);border-radius:100px;cursor:pointer;position:relative}
+.vol-fill{height:100%;background:rgba(255,255,255,.4);border-radius:100px;width:100%;pointer-events:none}
+
+/* Hidden native audio element */
+#aud{display:none}
+
+/* PROGRESS BAR (thin, seekable) */
+.prog-wrap{height:4px;background:var(--border);cursor:pointer;position:relative}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0%;transition:width .2s linear;border-radius:0 2px 2px 0}
+
+/* ══ LIVE CC PANEL ══ */
+.sub-divider{height:2px;background:var(--border)}
+.cc-panel{background:#0f0f0d;padding:0}
+
+/* CC toolbar */
+.cc-toolbar{padding:10px 20px;background:#1a1814;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
+.cc-badge{display:inline-flex;align-items:center;gap:5px;background:var(--accent2);border-radius:6px;padding:3px 9px;font-size:.65rem;font-weight:800;color:#fff;letter-spacing:.04em}
+.cc-source{font-size:.68rem;color:rgba(255,255,255,.35);flex:1}
+.cc-live-dot{width:5px;height:5px;background:#4ade80;border-radius:50%;animation:blink 1.4s infinite}
+.cc-live-label{font-size:.67rem;color:#4ade80;font-weight:700}
+
+/* CC text area */
+.cc-text-area{padding:18px 22px;min-height:80px;display:flex;align-items:center}
+#liveSubtitle{font-size:1.05rem;font-weight:500;color:#f0ede8;line-height:1.75;transition:opacity .18s ease;min-height:28px;word-break:break-word}
+#liveSubtitle.idle{color:rgba(255,255,255,.3);font-size:.88rem;font-style:italic;font-weight:400}
+
+/* Word highlight animation */
+.cc-word{display:inline;transition:color .15s}
+.cc-word.hi{color:#ffd580;font-weight:600}
+
+/* ══ TRANSCRIPT TICKER (scrolling full text) ══ */
+.ticker-wrap{background:#0a0a09;border-top:1px solid rgba(255,255,255,.06);padding:8px 22px;overflow:hidden;height:30px;position:relative}
+.ticker-inner{display:flex;align-items:center;gap:0;white-space:nowrap;animation:none;font-size:.72rem;color:rgba(255,255,255,.22);will-change:transform}
+.ticker-inner.running{animation:tickerScroll 40s linear infinite}
+@keyframes tickerScroll{from{transform:translateX(100%)}to{transform:translateX(-200%)}}
+.ticker-label{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-right:14px;flex-shrink:0}
+
+/* ═══════════════════════════════════
+   RIGHT SIDEBAR
+═══════════════════════════════════ */
+.side{display:flex;flex-direction:column;gap:16px}
+
+/* Download card */
+.dl-card{background:linear-gradient(160deg,var(--ink),#2d2620);border-radius:20px;padding:22px;box-shadow:var(--shadow-lg)}
+.dl-ic{font-size:1.8rem;display:block;margin-bottom:10px}
+.dl-card h3{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:900;color:#fff;margin-bottom:5px}
+.dl-card .desc{font-size:.74rem;color:rgba(255,255,255,.48);line-height:1.6;margin-bottom:14px}
+.layout-diagram{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;margin-bottom:13px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.ld-video{background:rgba(255,255,255,.12);border-radius:5px 0 0 5px;padding:9px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.ld-sub{background:rgba(200,119,58,.25);border-radius:0 5px 5px 0;padding:9px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-left:1px dashed rgba(200,119,58,.4)}
+.ld-label{font-size:.6rem;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;letter-spacing:.04em;text-align:center}
+.ld-icon{font-size:1rem}
+.dl-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Playfair Display',serif;font-size:.86rem;font-weight:800;cursor:pointer;text-decoration:none;transition:all .25s}
+.dl-btn:hover{background:#b8622a;transform:translateY(-2px);box-shadow:0 10px 24px rgba(200,119,58,.35)}
+.dl-loading{display:none;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--accent2);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Playfair Display',serif;font-size:.86rem;font-weight:800}
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fmt-row{display:flex;gap:5px;justify-content:center;margin-top:7px;flex-wrap:wrap}
+.fmt{background:rgba(255,255,255,.07);border-radius:100px;padding:2px 8px;font-size:.62rem;color:rgba(255,255,255,.35)}
+
+/* Audio-only download card variant */
+.srt-only-card{background:linear-gradient(160deg,#1a2e2a,#0f1f1c);border-radius:20px;padding:22px;box-shadow:var(--shadow-lg)}
+.srt-only-card h3{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:900;color:#fff;margin-bottom:5px}
+.srt-only-card .desc{font-size:.74rem;color:rgba(255,255,255,.48);line-height:1.6;margin-bottom:14px}
+.srt-dl-btn2{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:var(--accent2);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Playfair Display',serif;font-size:.86rem;font-weight:800;cursor:pointer;text-decoration:none;transition:all .25s}
+.srt-dl-btn2:hover{background:#256057;transform:translateY(-2px);box-shadow:0 10px 24px rgba(46,107,94,.35)}
+
+/* SRT preview card */
+.srt-card{background:var(--white);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.srt-head{padding:12px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.srt-ic{width:30px;height:30px;background:var(--accent-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.srt-head h3{font-family:'Playfair Display',serif;font-weight:800;font-size:.83rem;color:var(--ink)}
+.srt-head p{font-size:.67rem;color:var(--muted);margin-top:1px}
+.srt-body{background:#1e1a16;padding:14px 16px;font-family:'Courier New',monospace;font-size:.72rem;line-height:1.85;max-height:130px;overflow-y:auto}
+.sn{color:#c8773a}.st{color:#7bb8a4;font-size:.67rem}.sc{color:#f0f0e8;word-break:break-word;white-space:pre-wrap}
+.srt-dl{display:flex;align-items:center;justify-content:space-between;padding:10px 17px;border-top:1px solid var(--border);background:var(--bg)}
+.srt-dl-label{font-size:.73rem;color:var(--muted);font-weight:500}
+.srt-dl-link{font-size:.73rem;font-weight:700;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s}
+.srt-dl-link:hover{color:#b8622a}
+
+/* CC toggle button */
+.cc-toggle{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--muted);transition:all .2s;margin-bottom:0;width:100%}
+.cc-toggle:hover{border-color:var(--accent2);color:var(--ink)}
+.cc-toggle.on{background:var(--green-light);border-color:var(--accent2);color:var(--accent2)}
+.cc-toggle-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .2s}
+.cc-toggle.on .cc-toggle-dot{background:var(--accent2);animation:blink 1.4s infinite}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Sign<em>Bridge</em></a>
+  <a href="/index" class="back">← Home</a>
+</nav>
+
+<div class="hero-strip">
+  <div class="confetti">{% if input_type == 'audio' %}🎵{% else %}🎬{% endif %}</div>
+  <div class="strip-text">
+    <h1>Subtitles Generated!</h1>
+    <p>{% if input_type == 'audio' %}Audio transcribed with live CC playback — download your .srt file below.{% else %}Preview below — live CC syncs as the video plays. Download adds a subtitle side panel.{% endif %}</p>
+    <div class="strip-badges">
+      <span class="sbadge">💬 Live CC</span>
+      {% if input_type == 'audio' %}<span class="sbadge">🎵 Audio Mode</span>{% else %}<span class="sbadge">📹 Video Mode</span>{% endif %}
+      <span class="sbadge">📄 .srt Export</span>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="layout">
+
+    <!-- ══════ LEFT: PLAYER + LIVE CC ══════ -->
+    <div class="player-card">
+
+      <div class="player-head">
+        <div class="ph-ic">{% if input_type == 'audio' %}🎵{% else %}🎬{% endif %}</div>
+        <div class="ph-info">
+          <h2>{% if input_type == 'audio' %}Audio Preview{% else %}Video Preview{% endif %}</h2>
+          <p>Live CC appears in the panel below — not overlaid on your media</p>
+        </div>
+        <div class="live-pill"><div class="live-dot"></div>Live CC</div>
+      </div>
+
+      {% if input_type == 'audio' %}
+      <!-- ── AUDIO PLAYER ── -->
+      <div class="audio-box">
+        <audio id="aud" src="{{ url_for('uploaded_file', filename='audio.wav') }}"></audio>
+
+        <div class="audio-top">
+          <div class="audio-art">🎙️</div>
+          <div class="audio-info">
+            <div class="audio-title">Transcribed Audio</div>
+            <div class="audio-meta">WAV · 16kHz · Mono &nbsp;·&nbsp; <span id="durLabel">--:--</span></div>
+          </div>
+        </div>
+
+        <!-- Animated waveform bars -->
+        <div class="wave-viz" id="waveViz"></div>
+
+        <!-- Custom controls -->
+        <div class="audio-controls">
+          <button class="ctrl-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+          <div class="seek-wrap">
+            <div class="seek-track" id="seekTrack">
+              <div class="seek-fill" id="seekFill"></div>
+            </div>
+            <div class="time-row">
+              <span id="curTime">0:00</span>
+              <span id="totTime">--:--</span>
+            </div>
+          </div>
+          <div class="vol-wrap">
+            <span class="vol-icon">🔊</span>
+            <div class="vol-track" id="volTrack">
+              <div class="vol-fill" id="volFill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+      <!-- ── VIDEO PLAYER ── -->
+      <div class="video-box">
+        <video id="vid" controls>
+          <source src="{{ url_for('uploaded_file', filename='original.mp4') }}" type="video/mp4">
+        </video>
+      </div>
+      {% endif %}
+
+      <!-- SEEK BAR (video only; audio has its own) -->
+      {% if input_type != 'audio' %}
+      <div class="prog-wrap" id="progWrap"><div class="prog-fill" id="progFill"></div></div>
+      {% endif %}
+
+      <!-- ══ LIVE CC PANEL ══ -->
+      <div class="sub-divider"></div>
+      <div class="cc-panel">
+        <div class="cc-toolbar">
+          <span class="cc-badge">CC</span>
+          <span class="cc-source">Synced from transcription · {% if input_type == 'audio' %}audio{% else %}video{% endif %} playback</span>
+          <div class="cc-live-dot"></div>
+          <span class="cc-live-label">LIVE</span>
+        </div>
+        <div class="cc-text-area">
+          <div id="liveSubtitle" class="idle">Press play to see live captions here…</div>
+        </div>
+      </div>
+
+      <!-- TICKER -->
+      <div class="ticker-wrap">
+        <div class="ticker-inner" id="ticker">
+          <span class="ticker-label">TRANSCRIPT</span>
+          <span id="tickerText">{{ subtitle_text }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════ RIGHT SIDEBAR ══════ -->
+    <div class="side">
+
+      {% if input_type == 'audio' %}
+      <!-- Audio mode: just SRT download -->
+      <div class="srt-only-card">
+        <span class="dl-ic">📄</span>
+        <h3>Download Subtitles</h3>
+        <p class="desc">Your .srt file is ready. Use it with VLC, YouTube, Adobe Premiere, DaVinci Resolve, or any media player that supports external subtitles.</p>
+        <a href="{{ url_for('uploaded_file', filename=subtitle_file) }}" download="subtitles.srt" class="srt-dl-btn2">⬇ Download .srt File</a>
+      </div>
+
+      {% else %}
+      <!-- Video mode: merge + download -->
+      <div class="dl-card">
+        <span class="dl-ic">⬇️</span>
+        <h3>Download with Subtitles</h3>
+        <p class="desc">The downloaded video keeps your original on the left with a live subtitle panel on the right — H.264/AAC MP4.</p>
+        <div class="layout-diagram">
+          <div class="ld-video"><div class="ld-icon">🎬</div><div class="ld-label">Your<br>Video</div></div>
+          <div class="ld-sub"><div class="ld-icon">💬</div><div class="ld-label">Subtitle<br>Panel</div></div>
+        </div>
+        <form action="/merge_subtitle" method="POST" id="dlForm">
+          <button type="submit" class="dl-btn" id="dlBtn">⬇ Download Video + Subtitles</button>
+          <div class="dl-loading" id="dlLoading"><div class="spinner"></div>Building video…</div>
+        </form>
+        <div class="fmt-row">
+          <span class="fmt">H.264</span><span class="fmt">AAC</span><span class="fmt">Side Panel</span><span class="fmt">MP4</span>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- SRT card -->
+      <div class="srt-card">
+        <div class="srt-head">
+          <div class="srt-ic">📄</div>
+          <div>
+            <h3>subtitles.srt</h3>
+            <p>Transcribed · UTF-8</p>
+          </div>
+        </div>
+        <div class="srt-body">
+          <div><span class="sn">1</span></div>
+          <div><span class="st">00:00:00,000 → 00:10:00,000</span></div>
+          <div class="sc">{{ subtitle_text }}</div>
+        </div>
+        <div class="srt-dl">
+          <span class="srt-dl-label">VLC · YouTube · Premiere…</span>
+          <a href="{{ url_for('uploaded_file', filename=subtitle_file) }}" download class="srt-dl-link">⬇ .srt</a>
+        </div>
+      </div>
+
+      <!-- CC toggle card -->
+      <button class="cc-toggle on" id="ccToggle" onclick="toggleCC()">
+        <div class="cc-toggle-dot"></div>
+        <span id="ccToggleLabel">Live CC — On</span>
+      </button>
+
+    </div>
+  </div>
+</main>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA FROM FLASK
+═══════════════════════════════════════════ */
+const RAW_TEXT   = {{ subtitle_text | tojson }};
+const INPUT_TYPE = {{ (input_type or 'video') | tojson }};
+
+/* ═══════════════════════════════════════════
+   MEDIA ELEMENT — unify video / audio
+═══════════════════════════════════════════ */
+const media = INPUT_TYPE === 'audio'
+  ? document.getElementById('aud')
+  : document.getElementById('vid');
+
+/* ═══════════════════════════════════════════
+   CHUNKED CUE BUILDER
+   Splits transcript into ~7-word chunks,
+   spreads them evenly over media duration.
+═══════════════════════════════════════════ */
+function buildCues(text, duration) {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return [];
+  const chunkSize = 7;
+  const chunks = [];
+  for (let i = 0; i < words.length; i += chunkSize)
+    chunks.push(words.slice(i, i + chunkSize).join(' '));
+  const step = duration / chunks.length;
+  return chunks.map((t, i) => ({ start: i * step, end: (i + 1) * step, text: t }));
+}
+
+let cues     = [];
+let lastIdx  = -1;
+let ccOn     = true;
+
+const display  = document.getElementById('liveSubtitle');
+const ticker   = document.getElementById('ticker');
+
+/* Build cues once duration is known */
+media.addEventListener('loadedmetadata', () => {
+  cues = buildCues(RAW_TEXT, media.duration || 300);
+  // Start ticker
+  ticker.classList.add('running');
+  if (INPUT_TYPE === 'audio') {
+    document.getElementById('durLabel').textContent = fmtTime(media.duration);
+    document.getElementById('totTime').textContent  = fmtTime(media.duration);
+  }
+});
+
+/* Live CC sync */
+media.addEventListener('timeupdate', () => {
+  if (!ccOn) return;
+  const t = media.currentTime;
+
+  // Progress bar (video) / seek fill (audio) updated below in respective sections
+  const idx = cues.findIndex(c => t >= c.start && t < c.end);
+  if (idx !== -1 && idx !== lastIdx) {
+    lastIdx = idx;
+    display.style.opacity = '0';
+    setTimeout(() => {
+      renderCC(cues[idx].text);
+      display.classList.remove('idle');
+      display.style.opacity = '1';
+    }, 120);
+  }
+});
+
+media.addEventListener('ended', () => {
+  display.innerHTML = spanify(RAW_TEXT);
+  display.classList.remove('idle');
+});
+
+media.addEventListener('pause', () => {
+  display.style.opacity = '.55';
+});
+media.addEventListener('play', () => {
+  display.style.opacity = '1';
+});
+
+/* Render CC with word spans */
+function spanify(text) {
+  return text.split(/\s+/).map(w =>
+    `<span class="cc-word">${w}</span>`
+  ).join(' ');
+}
+function renderCC(text) {
+  display.innerHTML = spanify(text);
+  // Stagger-highlight words
+  const words = display.querySelectorAll('.cc-word');
+  words.forEach((w, i) => {
+    setTimeout(() => w.classList.add('hi'), i * 80);
+    setTimeout(() => w.classList.remove('hi'), i * 80 + 600);
+  });
+}
+
+/* CC toggle */
+function toggleCC() {
+  ccOn = !ccOn;
+  const btn = document.getElementById('ccToggle');
+  btn.classList.toggle('on', ccOn);
+  document.getElementById('ccToggleLabel').textContent = ccOn ? 'Live CC — On' : 'Live CC — Off';
+  if (!ccOn) {
+    display.classList.add('idle');
+    display.innerHTML = 'Captions paused…';
+  } else {
+    display.classList.remove('idle');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   VIDEO-SPECIFIC: progress bar + seek
+═══════════════════════════════════════════ */
+if (INPUT_TYPE !== 'audio') {
+  const progFill = document.getElementById('progFill');
+  media.addEventListener('timeupdate', () => {
+    if (media.duration) progFill.style.width = (media.currentTime / media.duration * 100) + '%';
+  });
+  document.getElementById('progWrap').addEventListener('click', e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    if (media.duration) media.currentTime = ((e.clientX - r.left) / r.width) * media.duration;
+  });
+  document.getElementById('dlForm')?.addEventListener('submit', () => {
+    document.getElementById('dlBtn').style.display = 'none';
+    document.getElementById('dlLoading').style.display = 'flex';
+  });
+}
+
+/* ═══════════════════════════════════════════
+   AUDIO PLAYER — custom controls
+═══════════════════════════════════════════ */
+if (INPUT_TYPE === 'audio') {
+  const playBtn  = document.getElementById('playBtn');
+  const seekTrack = document.getElementById('seekTrack');
+  const seekFill  = document.getElementById('seekFill');
+  const curTime   = document.getElementById('curTime');
+  const totTime   = document.getElementById('totTime');
+  const volTrack  = document.getElementById('volTrack');
+  const volFill   = document.getElementById('volFill');
+  const waveViz   = document.getElementById('waveViz');
+
+  /* Build waveform bars */
+  const BAR_COUNT = 52;
+  const bars = [];
+  for (let i = 0; i < BAR_COUNT; i++) {
+    const b = document.createElement('div');
+    b.className = 'wv-bar';
+    const h = 12 + Math.random() * 26;
+    b.style.height = h + 'px';
+    b.style.setProperty('--spd', (0.4 + Math.random() * 0.5) + 's');
+    b.style.animationDelay = (Math.random() * 0.4) + 's';
+    waveViz.appendChild(b);
+    bars.push(b);
+  }
+
+  /* Play / pause */
+  function togglePlay() {
+    if (media.paused) {
+      media.play();
+      playBtn.textContent = '⏸';
+      bars.forEach(b => b.classList.add('playing'));
+    } else {
+      media.pause();
+      playBtn.textContent = '▶';
+      bars.forEach(b => b.classList.remove('playing'));
+    }
+  }
+  window.togglePlay = togglePlay;
+
+  media.addEventListener('ended', () => {
+    playBtn.textContent = '▶';
+    bars.forEach(b => b.classList.remove('playing'));
+    seekFill.style.width = '100%';
+  });
+
+  /* Time display */
+  function fmtTime(s) {
+    if (!isFinite(s)) return '--:--';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + String(sec).padStart(2, '0');
+  }
+  window.fmtTime = fmtTime;
+
+  media.addEventListener('timeupdate', () => {
+    const pct = media.duration ? (media.currentTime / media.duration * 100) : 0;
+    seekFill.style.width = pct + '%';
+    curTime.textContent = fmtTime(media.currentTime);
+
+    /* Color played bars green, unplayed dimmed */
+    const played = Math.floor(pct / 100 * BAR_COUNT);
+    bars.forEach((b, i) => {
+      b.style.background = i < played
+        ? 'rgba(46,107,94,.85)'
+        : 'rgba(46,107,94,.28)';
+    });
+  });
+
+  /* Seek */
+  seekTrack.addEventListener('click', e => {
+    const r = seekTrack.getBoundingClientRect();
+    if (media.duration) media.currentTime = ((e.clientX - r.left) / r.width) * media.duration;
+  });
+
+  /* Volume */
+  let vol = 1;
+  volTrack.addEventListener('click', e => {
+    const r = volTrack.getBoundingClientRect();
+    vol = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    media.volume = vol;
+    volFill.style.width = (vol * 100) + '%';
+  });
+
+  /* Space bar to play/pause */
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+      e.preventDefault();
+      togglePlay();
+    }
+  });
+}
+</script>
+
+</body>
+</html>
